@@ -62,10 +62,6 @@ Se han reportado problemas conocidos en DigitalOcean, por ejemplo, donde la inst
 
 ---
 
-¡Gracias por la aclaración! Aquí está el ajuste con la información correcta sobre la versión de Ubuntu para Odoo 18:
-
----
-
 ## Compatibilidad de versiones de Odoo y Ubuntu
 Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuación, una lista de recomendaciones:
 
