@@ -1,49 +1,65 @@
-# [Odoo](https://www.odoo.com "Odoo's Homepage") Install Script
+# Contacta para Odoo Enterprise y Localización de tu País
 
-This script is based on the install script from André Schenkels (https://github.com/aschenkels-ictstudio/openerp-install-scripts)
-but goes a bit further and has been improved. This script will also give you the ability to define an xmlrpc_port in the .conf file that is generated under /etc/
-This script can be safely used in a multi-odoo code base server because the default Odoo port is changed BEFORE the Odoo is started.
+Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **localización de tu país**, contáctanos:
 
-## Installing Nginx
-If you set the parameter ```INSTALL_NGINX``` to ```True``` you should also configure workers. Without workers you will probably get connection loss issues. Look at [the deployment guide from Odoo](https://www.odoo.com/documentation/13.0/setup/deploy.html) on how to configure workers.
+- **Correo:** adiaz@adlacademy.com.do  
+- **WhatsApp:** +1 (809) 418-4467  
 
-## Installation procedure
+### Beneficios de Odoo Enterprise:
+- **Módulos Exclusivos:** Acceso a herramientas avanzadas como gestión de suscripciones, planificación avanzada y firmas electrónicas.  
+- **Soporte Oficial:** Recibe atención prioritaria directamente del equipo de Odoo.  
+- **Actualizaciones Continuas:** Asegura acceso a las últimas mejoras y correcciones de la plataforma.  
+- **Cumplimiento Legal:** Adaptación específica para cumplir con regulaciones locales de varios países.
 
-##### 1. Download the script:
+### Beneficios de la Localización:
+- **Cumplimiento Normativo:** Configuración para impuestos, facturación y contabilidad conforme a las leyes locales.  
+- **Optimización Operativa:** Ahorra tiempo adaptando Odoo a tu mercado específico.  
+- **Soporte Técnico:** Asistencia experta para configurar y utilizar las funciones localizadas.  
+
+---
+
+# [Odoo](https://www.odoo.com "Página principal de Odoo") Script de Instalación
+
+## Instalando Nginx
+Si configuras el parámetro ```INSTALL_NGINX``` como ```True```, también debes configurar los *workers*. Sin *workers*, probablemente experimentarás problemas de pérdida de conexión. Consulta [la guía de implementación de Odoo](https://www.odoo.com/documentation/13.0/setup/deploy.html) para aprender a configurar los *workers*.
+
+## Procedimiento de instalación
+
+##### 1. Descarga el script:
 ```
-sudo wget https://raw.githubusercontent.com/Yenthe666/InstallScript/13.0/odoo_install.sh
+sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/13.0/odoo_install.sh
 ```
-##### 2. Modify the parameters as you wish.
-There are a few things you can configure, this is the most used list:<br/>
-```OE_USER``` will be the username for the system user.<br/>
-```GENERATE_RANDOM_PASSWORD``` if this is set to ```True``` the script will generate a random password, if set to ```False```we'll set the password that is configured in ```OE_SUPERADMIN```. By default the value is ```True``` and the script will generate a random and secure password.<br/>
-```INSTALL_WKHTMLTOPDF``` set to ```False``` if you do not want to install Wkhtmltopdf, if you want to install it you should set it to ```True```.<br/>
-```OE_PORT``` is the port where Odoo should run on, for example 8069.<br/>
-```OE_VERSION``` is the Odoo version to install, for example ```13.0``` for Odoo V13.<br/>
-```IS_ENTERPRISE``` will install the Enterprise version on top of ```13.0``` if you set it to ```True```, set it to ```False``` if you want the community version of Odoo 13.<br/>
-```OE_SUPERADMIN``` is the master password for this Odoo installation.<br/>
-```INSTALL_NGINX``` is set to ```False``` by default. Set this to ```True``` if you want to install Nginx.<br/>
-```WEBSITE_NAME``` Set the website name here for nginx configuration<br/>
-```WEBSITE_NAME``` Set the website name here for nginx configuration<br/>
-```ENABLE_SSL``` Set this to ```True``` to install [certbot](https://github.com/certbot/certbot) and configure nginx with https using a free Let's Encrypted certificate<br/>
-```ADMIN_EMAIL``` Email is needed to register for Let's Encrypt registration. Replace the default placeholder with an email of your organisation.<br/>
-```INSTALL_NGINX``` and ```ENABLE_SSL``` must be set to ```True``` and the placeholder in ```ADMIN_EMAIL``` must be replaced with a valid email address for certbot installation<br/>
-  _By enabling SSL though Let's Encrypt you agree to the following [policies](https://www.eff.org/code/privacy/policy)_ <br/>
 
-#### 3. Make the script executable
+##### 2. Modifica los parámetros según tus necesidades.
+Hay algunos parámetros que puedes configurar. A continuación, la lista más utilizada:<br/>
+- ```OE_USER``` será el nombre de usuario para el usuario del sistema.<br/>
+- ```GENERATE_RANDOM_PASSWORD``` si se establece en ```True```, el script generará una contraseña aleatoria; si se establece en ```False```, se usará la contraseña configurada en ```OE_SUPERADMIN```. Por defecto, el valor es ```True``` y el script generará una contraseña aleatoria y segura.<br/>
+- ```INSTALL_WKHTMLTOPDF``` establece este parámetro en ```False``` si no deseas instalar Wkhtmltopdf; si quieres instalarlo, configúralo como ```True```.<br/>
+- ```OE_PORT``` es el puerto en el que Odoo se ejecutará, por ejemplo, 8069.<br/>
+- ```OE_VERSION``` es la versión de Odoo a instalar, por ejemplo, ```13.0``` para Odoo V13.<br/>
+- ```IS_ENTERPRISE``` instalará la versión Enterprise sobre ```13.0``` si lo configuras como ```True```; usa ```False``` para la versión Community de Odoo 13.<br/>
+- ```OE_SUPERADMIN``` es la contraseña maestra para esta instalación de Odoo.<br/>
+- ```INSTALL_NGINX``` está configurado como ```False``` por defecto. Configúralo en ```True``` si deseas instalar Nginx.<br/>
+- ```WEBSITE_NAME``` establece aquí el nombre del sitio web para la configuración de Nginx.<br/>
+- ```ENABLE_SSL``` configúralo en ```True``` para instalar [certbot](https://github.com/certbot/certbot) y configurar Nginx con HTTPS utilizando un certificado gratuito de Let's Encrypt.<br/>
+- ```ADMIN_EMAIL``` el correo electrónico necesario para el registro de Let's Encrypt. Reemplaza el valor predeterminado con un correo válido de tu organización.<br/>
+- ```INSTALL_NGINX``` y ```ENABLE_SSL``` deben estar configurados como ```True```, y el valor en ```ADMIN_EMAIL``` debe ser un correo válido para la instalación de certbot.<br/>
+  _Al habilitar SSL mediante Let's Encrypt, aceptas las siguientes [políticas](https://www.eff.org/code/privacy/policy)_.<br/>
+
+##### 3. Haz el script ejecutable:
 ```
 sudo chmod +x odoo_install.sh
 ```
-##### 4. Execute the script:
+
+##### 4. Ejecuta el script:
 ```
 sudo ./odoo_install.sh
 ```
 
-## Where should I host Odoo?
-There are plenty of great services that offer good hosting. The script has been tested with a few major players such as [Google Cloud](https://cloud.google.com/), [Hetzner](https://www.hetzner.com/), [Amazon AWS](https://aws.amazon.com/) and [DigitalOcean](https://www.digitalocean.com/products/droplets/).
-If you'd like you can use my [DigitalOcean referral link](https://m.do.co/c/d605cc420682) which gives you a 100$ voucher for free for the first 60 days.
+## ¿Dónde debería alojar Odoo?
+Existen muchos servicios excelentes que ofrecen buen alojamiento. Este script ha sido probado en algunos de los principales proveedores, como [Google Cloud](https://cloud.google.com/), [Hetzner](https://www.hetzner.com/), [Amazon AWS](https://aws.amazon.com/) y [DigitalOcean](https://www.digitalocean.com/products/droplets/).  
+Si lo prefieres, puedes usar mi [enlace de referencia de DigitalOcean](https://m.do.co/c/d605cc420682), que te otorga un cupón de 100 USD gratis durante los primeros 60 días.
 
-## Minimal server requirements
-While technically you can run an Odoo instance on 1GB (1024MB) of RAM it is absolutely not advised. A Linux instance typically uses 300MB-500MB and the rest has to be split among Odoo, postgreSQL and others. If you install an Odoo you should make sure to use at least 2GB of RAM. This script might fail with less resources too.
-There are known issues on DigitalOcean for example where the installation crashes on 1GB RAM machines. See https://github.com/Yenthe666/InstallScript/issues/243
-
+## Requisitos mínimos del servidor
+Aunque técnicamente puedes ejecutar una instancia de Odoo con 1GB (1024MB) de RAM, no es recomendable. Una instancia de Linux normalmente usa entre 300MB y 500MB, y el resto debe distribuirse entre Odoo, PostgreSQL y otros servicios. Si instalas Odoo, asegúrate de usar al menos 2GB de RAM. Este script podría fallar si los recursos son insuficientes.  
+Se han reportado problemas conocidos en DigitalOcean, por ejemplo, donde la instalación falla en máquinas con 1GB de RAM.
