@@ -1,9 +1,9 @@
-# Contacta para Odoo Enterprise y Localización de tu País
+# Contactanos para Odoo Enterprise y Localización de tu País
 
 Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **localización de tu país**, contáctanos:
 
-- **Correo:** adiaz@adlacademy.com.do  
-- **WhatsApp:** +1 (809) 418-4467  
+- **Correo:** info@adlacademy.com.do  
+- **WhatsApp:** +1(809)-418-4467  
 
 ### Beneficios de Odoo Enterprise:
 - **Módulos Exclusivos:** Acceso a herramientas avanzadas como gestión de suscripciones, planificación avanzada y firmas electrónicas.  
@@ -56,10 +56,24 @@ sudo chmod +x odoo_install.sh
 sudo ./odoo_install.sh
 ```
 
-## ¿Dónde debería alojar Odoo?
-Existen muchos servicios excelentes que ofrecen buen alojamiento. Este script ha sido probado en algunos de los principales proveedores, como [Google Cloud](https://cloud.google.com/), [Hetzner](https://www.hetzner.com/), [Amazon AWS](https://aws.amazon.com/) y [DigitalOcean](https://www.digitalocean.com/products/droplets/).  
-Si lo prefieres, puedes usar mi [enlace de referencia de DigitalOcean](https://m.do.co/c/d605cc420682), que te otorga un cupón de 100 USD gratis durante los primeros 60 días.
-
 ## Requisitos mínimos del servidor
 Aunque técnicamente puedes ejecutar una instancia de Odoo con 1GB (1024MB) de RAM, no es recomendable. Una instancia de Linux normalmente usa entre 300MB y 500MB, y el resto debe distribuirse entre Odoo, PostgreSQL y otros servicios. Si instalas Odoo, asegúrate de usar al menos 2GB de RAM. Este script podría fallar si los recursos son insuficientes.  
 Se han reportado problemas conocidos en DigitalOcean, por ejemplo, donde la instalación falla en máquinas con 1GB de RAM.
+
+---
+
+¡Gracias por la aclaración! Aquí está el ajuste con la información correcta sobre la versión de Ubuntu para Odoo 18:
+
+---
+
+## Compatibilidad de versiones de Odoo y Ubuntu
+Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuación, una lista de recomendaciones:
+
+- **Odoo 13:** Ubuntu 20.04
+- **Odoo 14:** Ubuntu 20.04  
+- **Odoo 15:** Ubuntu 20.04  
+- **Odoo 16:** Ubuntu 20.04  
+- **Odoo 17:** Ubuntu 22.04 
+- **Odoo 18:** Ubuntu 24.04 
+
+Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
