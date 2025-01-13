@@ -20,9 +20,6 @@ Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **loca
 
 # [Odoo](https://www.odoo.com "Página principal de Odoo") Script de Instalación
 
-## Instalando Nginx
-Si configuras el parámetro ```INSTALL_NGINX``` como ```True```, también debes configurar los *workers*. Sin *workers*, probablemente experimentarás problemas de pérdida de conexión. Consulta [la guía de implementación de Odoo](https://www.odoo.com/documentation/17.0/setup/deploy.html) para aprender a configurar los *workers*.
-
 ## Procedimiento de instalación
 
 ##### 1. Descarga el script:
@@ -30,28 +27,12 @@ Si configuras el parámetro ```INSTALL_NGINX``` como ```True```, también debes 
 sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/17.0/odoo_install.sh
 ```
 
-##### 2. Modifica los parámetros según tus necesidades.
-Hay algunos parámetros que puedes configurar. A continuación, la lista más utilizada:<br/>
-- ```OE_USER``` será el nombre de usuario para el usuario del sistema.<br/>
-- ```GENERATE_RANDOM_PASSWORD``` si se establece en ```True```, el script generará una contraseña aleatoria; si se establece en ```False```, se usará la contraseña configurada en ```OE_SUPERADMIN```. Por defecto, el valor es ```True``` y el script generará una contraseña aleatoria y segura.<br/>
-- ```INSTALL_WKHTMLTOPDF``` establece este parámetro en ```False``` si no deseas instalar Wkhtmltopdf; si quieres instalarlo, configúralo como ```True```.<br/>
-- ```OE_PORT``` es el puerto en el que Odoo se ejecutará, por ejemplo, 8069.<br/>
-- ```OE_VERSION``` es la versión de Odoo a instalar, por ejemplo, ```17.0``` para Odoo V13.<br/>
-- ```IS_ENTERPRISE``` instalará la versión Enterprise sobre ```17.0``` si lo configuras como ```True```; usa ```False``` para la versión Community de Odoo 13.<br/>
-- ```OE_SUPERADMIN``` es la contraseña maestra para esta instalación de Odoo.<br/>
-- ```INSTALL_NGINX``` está configurado como ```False``` por defecto. Configúralo en ```True``` si deseas instalar Nginx.<br/>
-- ```WEBSITE_NAME``` establece aquí el nombre del sitio web para la configuración de Nginx.<br/>
-- ```ENABLE_SSL``` configúralo en ```True``` para instalar [certbot](https://github.com/certbot/certbot) y configurar Nginx con HTTPS utilizando un certificado gratuito de Let's Encrypt.<br/>
-- ```ADMIN_EMAIL``` el correo electrónico necesario para el registro de Let's Encrypt. Reemplaza el valor predeterminado con un correo válido de tu organización.<br/>
-- ```INSTALL_NGINX``` y ```ENABLE_SSL``` deben estar configurados como ```True```, y el valor en ```ADMIN_EMAIL``` debe ser un correo válido para la instalación de certbot.<br/>
-  _Al habilitar SSL mediante Let's Encrypt, aceptas las siguientes [políticas](https://www.eff.org/code/privacy/policy)_.<br/>
-
-##### 3. Haz el script ejecutable:
+##### 2. Haz el script ejecutable:
 ```
 sudo chmod +x odoo_install.sh
 ```
 
-##### 4. Ejecuta el script:
+##### 3. Ejecuta el script:
 ```
 sudo ./odoo_install.sh
 ```
@@ -68,8 +49,8 @@ Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuació
 - **Odoo 13:** Ubuntu 20.04
 - **Odoo 14:** Ubuntu 20.04  
 - **Odoo 15:** Ubuntu 20.04  
-- **Odoo 16:** Ubuntu 20.04  
+- **Odoo 16:** Ubuntu 22.04  
 - **Odoo 17:** Ubuntu 22.04 
-- **Odoo 18:** Ubuntu 24.04 
+- **Odoo 18:** Ubuntu 24.04
 
 Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
