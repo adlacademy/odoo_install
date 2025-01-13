@@ -95,7 +95,7 @@ sudo chown -R $OE_USER:$OE_USER /odoo18/custom/addons
 #--------------------------------------------------
 echo -e "\n---- Validando archivo requirements.txt ----"
 if [ ! -f "$OE_HOME_EXT/requirements.txt" ]; then
-  wget https://github.com/odoo/odoo/raw/18.0/requirements.txt -O $OE_HOME_EXT/requirements.txt
+  wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/18.0/requirements.txt -O $OE_HOME_EXT/requirements.txt
 fi
 
 #--------------------------------------------------
