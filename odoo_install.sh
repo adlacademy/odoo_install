@@ -126,17 +126,16 @@ sudo chown -R $OE_USER:$OE_USER /odoo17/custom/addons
 # Validar y Descargar requirements.txt
 #--------------------------------------------------
 echo -e "\n---- Validando archivo requirements.txt ----"
-if [ ! -f "/$OE_USER/requirements.txt" ]; then
-  wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/17.0/requirements.txt -O /$OE_USER/requirements.txt
-fi
+wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/17.0/requirements.txt -O $OE_HOME_EXT/requirements.txt
+
 
 #--------------------------------------------------
 # Crear entorno virtual e instalar dependencias
 #--------------------------------------------------
-python3 -m venv /$OE_USER/venv
-source /$OE_USER/venv/bin/activate
-/$OE_USER/venv/bin/pip install --upgrade pip setuptools wheel
-/$OE_USER/venv/bin/pip3 install -r /$OE_USER/requirements.txt
+python3 -m venv $OE_HOME_EXT/venv
+source $OE_HOME_EXT/venv/bin/activate
+$OE_HOME_EXT/venv/bin/pip install --upgrade pip setuptools wheel
+$OE_HOME_EXT/venv/bin/pip3 install -r $OE_HOME_EXT/requirements.txt
 deactivate
 
 #--------------------------------------------------
