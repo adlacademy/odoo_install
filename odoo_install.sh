@@ -36,9 +36,6 @@ exec 2>&1
 echo -e "\n---- Actualizando el Servidor ----"
 sudo apt-get update -y
 sudo apt-get upgrade -y
-sudo add-apt-repository universe
-sudo add-apt-repository multiverse
-sudo apt-get update -y
 
 #--------------------------------------------------
 # Instalar PostgreSQL
@@ -129,18 +126,17 @@ sudo chown -R $OE_USER:$OE_USER /odoo17/custom/addons
 # Validar y Descargar requirements.txt
 #--------------------------------------------------
 echo -e "\n---- Validando archivo requirements.txt ----"
-if [ ! -f "$OE_HOME_EXT/requirements.txt" ]; then
-  wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/17.0/requirements.txt -O $OE_HOME_EXT/requirements.txt
+if [ ! -f "/$OE_USER/requirements.txt" ]; then
+  wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/17.0/requirements.txt -O /$OE_USER/requirements.txt
 fi
 
 #--------------------------------------------------
 # Crear entorno virtual e instalar dependencias
 #--------------------------------------------------
-python3 -m venv $OE_HOME_EXT/venv
-source $OE_HOME_EXT/venv/bin/activate
-$OE_HOME_EXT/venv/bin/pip install --upgrade pip setuptools wheel
-$OE_HOME_EXT/venv/bin/pip3 install -r $OE_HOME_EXT/requirements.txt
-$OE_HOME_EXT/venv/bin/pip3 install gevent==22.10.2 "greenlet>=2.0.0,<3.0.0"
+python3 -m venv /$OE_USER/venv
+source /$OE_USER/venv/bin/activate
+/$OE_USER/venv/bin/pip install --upgrade pip setuptools wheel
+/$OE_USER/venv/bin/pip3 install -r /$OE_USER/requirements.txt
 deactivate
 
 #--------------------------------------------------
