@@ -137,6 +137,10 @@ $OE_HOME_EXT/venv/bin/pip install --upgrade pip==22.3
 $OE_HOME_EXT/venv/bin/pip install -r $OE_HOME_EXT/requirements.txt
 deactivate
 
+source $OE_HOME_EXT/venv/bin/activate
+$OE_HOME_EXT/venv/bin/pip install -r $OE_HOME_EXT/requirements.txt
+deactivate
+
 #--------------------------------------------------
 # Reinstalar Wkhtmltopdf y dependencias
 #--------------------------------------------------
