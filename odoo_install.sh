@@ -64,8 +64,41 @@ fi
 # Instalar Dependencias
 #--------------------------------------------------
 echo -e "\n---- Instalando Python 3 y configurando entorno virtual ----"
-sudo apt-get install git python3 python3-venv python3-wheel build-essential wget python3-dev libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools libffi-dev libssl-dev -y
-sudo apt-get install -y python3-pip
+sudo apt-get update -y
+
+# Instalar herramientas esenciales y dependencias de Python
+sudo apt-get install -y \
+  git \
+  python3 \
+  python3-venv \
+  python3-wheel \
+  python3-pip \
+  build-essential \
+  wget \
+  python3-dev \
+  libxslt-dev \
+  libzip-dev \
+  libldap2-dev \
+  libsasl2-dev \
+  python3-setuptools \
+  libffi-dev \
+  libssl-dev \
+  zlib1g-dev \
+  libjpeg-dev \
+  libfreetype6-dev \
+  liblcms2-dev \
+  libwebp-dev \
+  libtiff-dev \
+  libopenjp2-7-dev \
+  libfribidi-dev \
+  libharfbuzz-dev \
+  libfontconfig1-dev \
+  libx11-dev
+
+# Actualizar pip a la última versión
+echo -e "\n---- Actualizando pip ----"
+python3 -m pip install --upgrade pip
+
 
 #--------------------------------------------------
 # Descargar y Configurar Odoo
@@ -98,11 +131,10 @@ fi
 #--------------------------------------------------
 # Crear entorno virtual e instalar dependencias
 #--------------------------------------------------
-echo -e "\n---- Creando el entorno virtual ----"
 python3 -m venv $OE_HOME_EXT/venv
 source $OE_HOME_EXT/venv/bin/activate
-$OE_HOME_EXT/venv/bin/pip3 install --upgrade pip
-$OE_HOME_EXT/venv/bin/pip3 install -r $OE_HOME_EXT/requirements.txt
+$OE_HOME_EXT/venv/bin/pip install --upgrade pip==22.3
+$OE_HOME_EXT/venv/bin/pip install -r $OE_HOME_EXT/requirements.txt
 deactivate
 
 #--------------------------------------------------
