@@ -94,9 +94,8 @@ sudo chown -R $OE_USER:$OE_USER /odoo18/custom/addons
 # Validar y Descargar requirements.txt
 #--------------------------------------------------
 echo -e "\n---- Validando archivo requirements.txt ----"
-if [ ! -f "$OE_HOME_EXT/requirements.txt" ]; then
-  wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/18.0/requirements.txt -O $OE_HOME_EXT/requirements.txt
-fi
+wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/18.0/requirements.txt -O $OE_HOME_EXT/requirements.txt
+
 
 #--------------------------------------------------
 # Crear entorno virtual e instalar dependencias
