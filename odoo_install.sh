@@ -101,8 +101,8 @@ fi
 echo -e "\n---- Creando el entorno virtual ----"
 python3 -m venv $OE_HOME_EXT/venv
 source $OE_HOME_EXT/venv/bin/activate
-$OE_HOME_EXT/venv/bin/pip install --upgrade pip
-$OE_HOME_EXT/venv/bin/pip install -r $OE_HOME_EXT/requirements.txt
+$OE_HOME_EXT/venv/bin/pip3 install --upgrade pip
+$OE_HOME_EXT/venv/bin/pip3 install -r $OE_HOME_EXT/requirements.txt
 deactivate
 
 #--------------------------------------------------
