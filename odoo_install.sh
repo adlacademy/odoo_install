@@ -93,7 +93,9 @@ sudo apt-get install -y \
   libfribidi-dev \
   libharfbuzz-dev \
   libfontconfig1-dev \
-  libx11-dev
+  libev-dev \
+  libx11-dev \
+  cython
 
 # Actualizar pip a la última versión
 echo -e "\n---- Actualizando pip ----"
