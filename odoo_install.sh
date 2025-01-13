@@ -64,7 +64,7 @@ fi
 # Instalar Dependencias
 #--------------------------------------------------
 echo -e "\n---- Instalando Python 3 y configurando entorno virtual ----"
-sudo apt-get install git python3 python3-venv python3-wheel build-essential wget python3-dev libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools -y
+sudo apt-get install git python3 python3-venv python3-wheel build-essential wget python3-dev libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools libffi-dev libssl-dev -y
 sudo apt-get install -y python3-pip
 
 #--------------------------------------------------
