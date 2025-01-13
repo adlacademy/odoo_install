@@ -140,6 +140,7 @@ python3 -m venv $OE_HOME_EXT/venv
 source $OE_HOME_EXT/venv/bin/activate
 $OE_HOME_EXT/venv/bin/pip install --upgrade pip setuptools wheel
 $OE_HOME_EXT/venv/bin/pip3 install -r $OE_HOME_EXT/requirements.txt
+$OE_HOME_EXT/venv/bin/pip3 install gevent==22.10.2 "greenlet>=2.0.0,<3.0.0"
 deactivate
 
 #--------------------------------------------------
