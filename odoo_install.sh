@@ -34,8 +34,11 @@ exec 2>&1
 # Actualizar Servidor
 #--------------------------------------------------
 echo -e "\n---- Actualizando el Servidor ----"
-sudo apt-get update
+sudo apt-get update -y
 sudo apt-get upgrade -y
+sudo add-apt-repository universe
+sudo add-apt-repository multiverse
+sudo apt-get update -y
 
 #--------------------------------------------------
 # Instalar PostgreSQL
@@ -68,34 +71,34 @@ sudo apt-get update -y
 
 # Instalar herramientas esenciales y dependencias de Python
 sudo apt-get install -y \
-  git \
-  python3 \
-  python3-venv \
-  python3-wheel \
-  python3-pip \
-  build-essential \
-  wget \
-  python3-dev \
-  libxslt-dev \
-  libzip-dev \
-  libldap2-dev \
-  libsasl2-dev \
-  python3-setuptools \
-  libffi-dev \
-  libssl-dev \
-  zlib1g-dev \
-  libjpeg-dev \
-  libfreetype6-dev \
-  liblcms2-dev \
-  libwebp-dev \
-  libtiff-dev \
-  libopenjp2-7-dev \
-  libfribidi-dev \
-  libharfbuzz-dev \
-  libfontconfig1-dev \
-  libev-dev \
-  libx11-dev \
-  cython
+    git \
+    python3 \
+    python3-venv \
+    python3-wheel \
+    python3-pip \
+    build-essential \
+    wget \
+    python3-dev \
+    libxslt-dev \
+    libzip-dev \
+    libldap2-dev \
+    libsasl2-dev \
+    python3-setuptools \
+    libffi-dev \
+    libssl-dev \
+    zlib1g-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    liblcms2-dev \
+    libwebp-dev \
+    libtiff-dev \
+    libopenjp2-7-dev \
+    libfribidi-dev \
+    libharfbuzz-dev \
+    libfontconfig1-dev \
+    libev-dev \
+    libx11-dev \
+    cython3
 
 # Actualizar pip a la última versión
 echo -e "\n---- Actualizando pip ----"
