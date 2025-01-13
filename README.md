@@ -70,6 +70,6 @@ Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuació
 - **Odoo 15:** Ubuntu 20.04  
 - **Odoo 16:** Ubuntu 20.04  
 - **Odoo 17:** Ubuntu 22.04 
-- **Odoo 18:** Ubuntu 24.04 
+- **Odoo 18:** Ubuntu 24.04
 
 Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
