@@ -21,13 +21,13 @@ Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **loca
 # [Odoo](https://www.odoo.com "Página principal de Odoo") Script de Instalación
 
 ## Instalando Nginx
-Si configuras el parámetro ```INSTALL_NGINX``` como ```True```, también debes configurar los *workers*. Sin *workers*, probablemente experimentarás problemas de pérdida de conexión. Consulta [la guía de implementación de Odoo](https://www.odoo.com/documentation/13.0/setup/deploy.html) para aprender a configurar los *workers*.
+Si configuras el parámetro ```INSTALL_NGINX``` como ```True```, también debes configurar los *workers*. Sin *workers*, probablemente experimentarás problemas de pérdida de conexión. Consulta [la guía de implementación de Odoo](https://www.odoo.com/documentation/12.0/setup/deploy.html) para aprender a configurar los *workers*.
 
 ## Procedimiento de instalación
 
 ##### 1. Descarga el script:
 ```
-sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/13.0/odoo_install.sh
+sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/12.0/odoo_install.sh
 ```
 
 ##### 2. Modifica los parámetros según tus necesidades.
@@ -36,8 +36,8 @@ Hay algunos parámetros que puedes configurar. A continuación, la lista más ut
 - ```GENERATE_RANDOM_PASSWORD``` si se establece en ```True```, el script generará una contraseña aleatoria; si se establece en ```False```, se usará la contraseña configurada en ```OE_SUPERADMIN```. Por defecto, el valor es ```True``` y el script generará una contraseña aleatoria y segura.<br/>
 - ```INSTALL_WKHTMLTOPDF``` establece este parámetro en ```False``` si no deseas instalar Wkhtmltopdf; si quieres instalarlo, configúralo como ```True```.<br/>
 - ```OE_PORT``` es el puerto en el que Odoo se ejecutará, por ejemplo, 8069.<br/>
-- ```OE_VERSION``` es la versión de Odoo a instalar, por ejemplo, ```13.0``` para Odoo V13.<br/>
-- ```IS_ENTERPRISE``` instalará la versión Enterprise sobre ```13.0``` si lo configuras como ```True```; usa ```False``` para la versión Community de Odoo 13.<br/>
+- ```OE_VERSION``` es la versión de Odoo a instalar, por ejemplo, ```12.0``` para Odoo V12.<br/>
+- ```IS_ENTERPRISE``` instalará la versión Enterprise sobre ```12.0``` si lo configuras como ```True```; usa ```False``` para la versión Community de Odoo 12.<br/>
 - ```OE_SUPERADMIN``` es la contraseña maestra para esta instalación de Odoo.<br/>
 - ```INSTALL_NGINX``` está configurado como ```False``` por defecto. Configúralo en ```True``` si deseas instalar Nginx.<br/>
 - ```WEBSITE_NAME``` establece aquí el nombre del sitio web para la configuración de Nginx.<br/>
@@ -65,11 +65,12 @@ Se han reportado problemas conocidos en DigitalOcean, por ejemplo, donde la inst
 ## Compatibilidad de versiones de Odoo y Ubuntu
 Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuación, una lista de recomendaciones:
 
+- **Odoo 12:** Ubuntu 18.04
 - **Odoo 13:** Ubuntu 20.04
-- **Odoo 14:** Ubuntu 20.04  
-- **Odoo 15:** Ubuntu 20.04  
-- **Odoo 16:** Ubuntu 20.04  
-- **Odoo 17:** Ubuntu 22.04 
+- **Odoo 14:** Ubuntu 20.04
+- **Odoo 15:** Ubuntu 20.04
+- **Odoo 16:** Ubuntu 20.04
+- **Odoo 17:** Ubuntu 22.04
 - **Odoo 18:** Ubuntu 24.04 
 
 Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
