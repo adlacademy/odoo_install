@@ -12,9 +12,16 @@ OE_PORT="8069"
 OE_VERSION="12.0"
 IS_ENTERPRISE="False"
 INSTALL_NGINX="False"
-OE_SUPERADMIN="admin"
 GENERATE_RANDOM_PASSWORD="True"
 OE_CONFIG="${OE_USER}-server"
+
+# Generar password ANTES de usarlo en PostgreSQL
+if [ "$GENERATE_RANDOM_PASSWORD" = "True" ]; then
+    OE_SUPERADMIN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
+    echo "Password generado automaticamente"
+else
+    OE_SUPERADMIN="admin"
+fi
 WEBSITE_NAME="_"
 LONGPOLLING_PORT="8072"
 ENABLE_SSL="True"
@@ -322,10 +329,7 @@ deactivate
 #--------------------------------------------------
 # Configurar Archivo de Configuracion
 #--------------------------------------------------
-echo -e "\n---- Generando password de admin ----"
-if [ $GENERATE_RANDOM_PASSWORD = "True" ]; then
-    OE_SUPERADMIN=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1)
-fi
+echo -e "\n---- Configurando archivo de Odoo ----"
 
 if [ $IS_ENTERPRISE = "True" ]; then
     ADDONS_PATH="${OE_HOME}/enterprise/addons,${OE_HOME_EXT}/addons,/odoo12/custom/addons"
