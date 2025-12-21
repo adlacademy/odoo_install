@@ -20,8 +20,8 @@ LONGPOLLING_PORT="8072"
 ENABLE_SSL="True"
 ADMIN_EMAIL="odoo@example.com"
 
-WKHTMLTOX_X64=https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.trusty_amd64.deb
-WKHTMLTOX_X32=https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.trusty_i386.deb
+WKHTMLTOX_X64=https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_amd64.deb
+WKHTMLTOX_X32=https://github.com/wkhtmltopdf/wkhtmltopdf/releases/download/0.12.5/wkhtmltox_0.12.5-1.bionic_i386.deb
 
 # Redirigir toda la salida a un archivo de log
 LOG_FILE="odoo_install_logs.txt"
@@ -29,13 +29,58 @@ exec > >(tee -i $LOG_FILE)
 exec 2>&1
 
 #--------------------------------------------------
-# Actualizar Servidor
+# Funcion para descargar archivos con reintentos y fallbacks
 #--------------------------------------------------
-echo -e "\n---- Actualizando el Servidor ----"
+download_file() {
+  local url="$1"
+  local output="$2"
+  local max_retries=3
+  local retry=0
+
+  while [ $retry -lt $max_retries ]; do
+    retry=$((retry + 1))
+    echo "Descargando $url (intento $retry/$max_retries)..."
+
+    # Intentar con wget
+    if wget --no-check-certificate -q -O "$output" "$url" 2>/dev/null; then
+      echo "Descarga exitosa con wget"
+      return 0
+    fi
+
+    # Intentar con curl como fallback
+    if curl -L -k -s -o "$output" "$url" 2>/dev/null; then
+      echo "Descarga exitosa con curl"
+      return 0
+    fi
+
+    echo "Intento $retry fallido, reintentando..."
+    sleep 2
+  done
+
+  echo "Error: No se pudo descargar $url despues de $max_retries intentos"
+  return 1
+}
+
+#--------------------------------------------------
+# Actualizar Servidor y Certificados
+#--------------------------------------------------
+echo -e "\n---- Actualizando el Servidor y Certificados SSL ----"
+
+# Instalar curl y ca-certificates PRIMERO para arreglar problemas de SSL
+sudo apt-get update || true
+sudo apt-get install -y curl ca-certificates apt-transport-https gnupg
+
+# Actualizar certificados CA
+sudo update-ca-certificates --fresh
+
+# Configurar git para manejar problemas de SSL
+git config --global http.sslVerify false
+git config --global http.postBuffer 524288000
+
 # universe package is for Ubuntu 18.x
 sudo add-apt-repository universe -y
-# libpng12-0 dependency for wkhtmltopdf
-sudo add-apt-repository "deb http://mirrors.kernel.org/ubuntu/ xenial main" -y
+# libpng12-0 dependency for wkhtmltopdf (solo para versiones antiguas)
+sudo add-apt-repository "deb http://mirrors.kernel.org/ubuntu/ xenial main" -y 2>/dev/null || true
 sudo apt-get update
 sudo apt-get upgrade -y
 
@@ -69,24 +114,87 @@ fi
 echo -e "\n---- Instalando Python 3 y dependencias para Odoo 12 ----"
 sudo apt-get install git python3 python3-pip python3-venv python3-wheel build-essential wget python3-dev libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools node-less libjpeg-dev gdebi -y
 
+#--------------------------------------------------
+# Instalar Node.js compatible con la version de Ubuntu
+#--------------------------------------------------
 echo -e "\n---- Instalando nodeJS NPM y rtlcss para soporte LTR ----"
-sudo apt-get install nodejs npm -y
-sudo npm install -g rtlcss
+
+# Detectar version de Ubuntu
+UBUNTU_VERSION=$(lsb_release -rs 2>/dev/null || echo "18.04")
+echo "Version de Ubuntu detectada: $UBUNTU_VERSION"
+
+# Determinar version de Node.js compatible
+# Ubuntu 18.04 tiene libc6 2.27, Node.js 18+ requiere libc6 >= 2.28
+# Por lo tanto usamos Node.js 16 LTS para Ubuntu 18.04
+case "$UBUNTU_VERSION" in
+  "18.04")
+    NODE_VERSION="16"
+    ;;
+  "20.04"|"22.04"|*)
+    NODE_VERSION="18"
+    ;;
+esac
+
+echo "Instalando Node.js $NODE_VERSION..."
+
+# Limpiar instalaciones previas de nodejs
+sudo apt-get remove -y nodejs npm 2>/dev/null || true
+sudo apt-get autoremove -y 2>/dev/null || true
+
+# Instalar Node.js desde NodeSource
+curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | sudo -E bash - || {
+  # Fallback: descargar e instalar manualmente
+  echo "Fallback: Instalando Node.js manualmente..."
+  download_file "https://deb.nodesource.com/setup_${NODE_VERSION}.x" "/tmp/nodesource_setup.sh"
+  sudo bash /tmp/nodesource_setup.sh
+}
+
+sudo apt-get install -y nodejs || {
+  echo "Error instalando Node.js $NODE_VERSION, intentando con version de repositorio..."
+  sudo apt-get install -y nodejs npm
+}
+
+# Verificar instalacion
+echo "Node.js version: $(node --version 2>/dev/null || echo 'no instalado')"
+echo "NPM version: $(npm --version 2>/dev/null || echo 'no instalado')"
+
+# Instalar rtlcss globalmente
+sudo npm install -g rtlcss 2>/dev/null || {
+  echo "Advertencia: rtlcss no se pudo instalar (opcional para soporte RTL)"
+}
 
 #--------------------------------------------------
 # Instalar Wkhtmltopdf si es necesario
 #--------------------------------------------------
 if [ $INSTALL_WKHTMLTOPDF = "True" ]; then
   echo -e "\n---- Instalando wkhtml para ODOO 12 ----"
+
+  # Seleccionar URL segun arquitectura
   if [ "`getconf LONG_BIT`" == "64" ];then
       _url=$WKHTMLTOX_X64
   else
       _url=$WKHTMLTOX_X32
   fi
-  sudo wget $_url -P /tmp/
-  sudo gdebi --n /tmp/`basename $_url`
-  sudo ln -s /usr/local/bin/wkhtmltopdf /usr/bin 2>/dev/null || true
-  sudo ln -s /usr/local/bin/wkhtmltoimage /usr/bin 2>/dev/null || true
+
+  _filename=$(basename $_url)
+  _filepath="/tmp/$_filename"
+
+  # Descargar usando la funcion con reintentos
+  if download_file "$_url" "$_filepath"; then
+    sudo gdebi --n "$_filepath" || {
+      echo "gdebi fallo, intentando con dpkg..."
+      sudo dpkg -i "$_filepath" || true
+      sudo apt-get install -f -y
+    }
+    sudo ln -sf /usr/local/bin/wkhtmltopdf /usr/bin/wkhtmltopdf
+    sudo ln -sf /usr/local/bin/wkhtmltoimage /usr/bin/wkhtmltoimage
+    echo "wkhtmltopdf instalado correctamente"
+  else
+    echo "Advertencia: No se pudo descargar wkhtmltopdf. Intentando instalar desde repositorio..."
+    sudo apt-get install -y wkhtmltopdf || {
+      echo "Advertencia: wkhtmltopdf no instalado. Los reportes PDF podrian no funcionar correctamente."
+    }
+  fi
 else
   echo "Wkhtmltopdf no se instala por eleccion del usuario!"
 fi
@@ -110,9 +218,48 @@ echo "Creando el directorio del servidor Odoo..."
 sudo mkdir -p $OE_HOME_EXT
 
 echo "Clonando el repositorio de Odoo en $OE_HOME_EXT..."
-git clone --depth 1 --branch $OE_VERSION https://github.com/odoo/odoo.git $OE_HOME_EXT || {
-  echo "Error al clonar el repositorio de Odoo. Verifica la conectividad y la URL."; exit 1;
-}
+
+# Intentar clonar con reintentos
+MAX_RETRIES=3
+RETRY_COUNT=0
+CLONE_SUCCESS=false
+
+while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$CLONE_SUCCESS" = "false" ]; do
+  RETRY_COUNT=$((RETRY_COUNT + 1))
+  echo "Intento de clonacion $RETRY_COUNT de $MAX_RETRIES..."
+
+  if git clone --depth 1 --branch $OE_VERSION https://github.com/odoo/odoo.git $OE_HOME_EXT 2>&1; then
+    CLONE_SUCCESS=true
+    echo "Clonacion exitosa!"
+  else
+    echo "Fallo el intento $RETRY_COUNT"
+    sudo rm -rf $OE_HOME_EXT/* 2>/dev/null
+    sleep 3
+  fi
+done
+
+# Si el clone falla, descargar el ZIP como alternativa
+if [ "$CLONE_SUCCESS" = "false" ]; then
+  echo "El clone de git fallo. Descargando ZIP como alternativa..."
+
+  sudo apt-get install -y unzip
+
+  # Descargar el ZIP del release
+  ODOO_ZIP_URL="https://github.com/odoo/odoo/archive/refs/heads/${OE_VERSION}.zip"
+
+  if download_file "$ODOO_ZIP_URL" "/tmp/odoo-${OE_VERSION}.zip"; then
+    echo "ZIP descargado. Extrayendo..."
+    sudo rm -rf $OE_HOME_EXT
+    unzip -q /tmp/odoo-${OE_VERSION}.zip -d /tmp/
+    sudo mv /tmp/odoo-${OE_VERSION} $OE_HOME_EXT
+    rm -f /tmp/odoo-${OE_VERSION}.zip
+    CLONE_SUCCESS=true
+    echo "Odoo descargado y extraido exitosamente desde ZIP!"
+  else
+    echo "Error: No se pudo descargar Odoo. Verifica tu conexion a internet."
+    exit 1
+  fi
+fi
 
 if [ $IS_ENTERPRISE = "True" ]; then
     echo -e "\n--- Creando symlink para node"
@@ -142,10 +289,16 @@ sudo chown -R $OE_USER:$OE_USER $OE_HOME_EXT
 sudo chown -R $OE_USER:$OE_USER /odoo12/custom/addons
 
 #--------------------------------------------------
-# Validar y Descargar requirements.txt
+# Validar requirements.txt
 #--------------------------------------------------
 echo -e "\n---- Validando archivo requirements.txt ----"
-wget https://raw.githubusercontent.com/odoo/odoo/${OE_VERSION}/requirements.txt -O $OE_HOME_EXT/requirements.txt
+if [ ! -f "$OE_HOME_EXT/requirements.txt" ]; then
+  echo "Descargando requirements.txt..."
+  download_file "https://raw.githubusercontent.com/odoo/odoo/${OE_VERSION}/requirements.txt" "$OE_HOME_EXT/requirements.txt" || {
+    echo "Error: No se pudo descargar requirements.txt"
+    exit 1
+  }
+fi
 
 #--------------------------------------------------
 # Crear entorno virtual e instalar dependencias
