@@ -67,7 +67,7 @@ sudo apt-get install -y python3-pip
 
 # Dependencias adicionales específicas para Odoo 19
 echo -e "\n---- Instalando dependencias adicionales de Odoo 19 ----"
-sudo apt-get install npm node-less libjpeg-dev zlib1g-dev libpq-dev libxml2-dev libffi-dev libssl-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev -y
+sudo apt-get install npm node-less libjpeg-dev zlib1g-dev libpq-dev libxml2-dev libffi-dev libssl-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev libcairo2-dev pkg-config -y
 
 #--------------------------------------------------
 # Descargar y Configurar Odoo

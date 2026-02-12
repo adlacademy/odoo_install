@@ -97,3 +97,4 @@ zeep==4.1.0 ; python_version < '3.11'  # (jammy)
 zeep==4.2.1 ; python_version >= '3.11' and python_version < '3.13'
 zeep==4.3.1 ; python_version >= '3.13'
 pdfminer.six  # Para indexación de documentos PDF en attachment_indexation
+rlPyCairo  # Backend de renderizado para reportlab (códigos de barras en PDFs)
