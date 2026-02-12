@@ -137,7 +137,7 @@ db_user = $OE_USER
 db_password = $OE_SUPERADMIN
 addons_path=${OE_HOME_EXT}/addons,/odoo19/custom/addons
 logfile=/var/log/$OE_USER/odoo.log
-logrotate=true
+http_interface=0.0.0.0
 EOL
 
 sudo mkdir -p /var/log/$OE_USER
