@@ -163,6 +163,8 @@ Group=$OE_USER
 ExecStart=$OE_HOME_EXT/venv/bin/python3 $OE_HOME_EXT/odoo-bin -c /etc/${OE_CONFIG}.conf
 StandardOutput=journal+console
 WorkingDirectory=$OE_HOME_EXT
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
