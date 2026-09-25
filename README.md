@@ -24,8 +24,10 @@ Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **loca
 
 ##### 1. Descarga el script:
 ```
-sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/19.0/odoo_install.sh
+sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/20.0/odoo_install.sh
 ```
+
+> La rama por defecto es **20.0** (Odoo 20). Para instalar otra versión, cambia `20.0` en la URL por la rama correspondiente (`19.0`, `18.0`, `17.0`...).
 
 ##### 2. Haz el script ejecutable:
 ```
@@ -53,5 +55,6 @@ Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuació
 - **Odoo 17:** Ubuntu 22.04 
 - **Odoo 18:** Ubuntu 24.04
 - **Odoo 19:** Ubuntu 24.04
+- **Odoo 20:** Ubuntu 24.04 (requiere Python 3.12 a 3.14 y PostgreSQL 16 o superior; **no** funciona en Ubuntu 22.04)
 
 Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
