@@ -40,6 +40,19 @@ LOG_FILE="odoo_install_logs.txt"
 exec > >(tee -i $LOG_FILE)
 exec 2>&1
 
+# Detiene la instalacion si falla un paso critico, en lugar de continuar y
+# dejar un Odoo que no arranca. El script se puede volver a ejecutar.
+abortar() {
+  echo -e "\n*** ERROR: $1 ***"
+  echo "Revisa el log ($LOG_FILE) y vuelve a ejecutar el script cuando se resuelva."
+  exit 1
+}
+
+# Reintentos ante cortes de red: apt reintenta descargas y wget tambien los
+# fallos de DNS ("Temporary failure in name resolution").
+APT_GET="sudo apt-get -o Acquire::Retries=5"
+WGET="wget --tries=5 --waitretry=10 --retry-connrefused --retry-on-host-error"
+
 #--------------------------------------------------
 # Validar version de Python (Odoo 20 exige 3.12 - 3.14)
 #--------------------------------------------------
@@ -56,14 +69,14 @@ echo "Python $PY_VERSION: compatible"
 # Actualizar Servidor
 #--------------------------------------------------
 echo -e "\n---- Actualizando el Servidor ----"
-sudo apt-get update
-sudo apt-get upgrade -y
+$APT_GET update || abortar "no se pudo actualizar la lista de paquetes (apt-get update)"
+$APT_GET upgrade -y || abortar "fallo la actualizacion del sistema (apt-get upgrade)"
 
 #--------------------------------------------------
 # Instalar PostgreSQL
 #--------------------------------------------------
 echo -e "\n---- Instalando PostgreSQL ----"
-sudo apt-get install postgresql postgresql-server-dev-all -y
+$APT_GET install postgresql postgresql-server-dev-all -y || abortar "no se pudo instalar PostgreSQL"
 
 PG_VERSION=$(ls /etc/postgresql | sort -n | tail -1)
 if [ -z "$PG_VERSION" ] || [ "${PG_VERSION%%.*}" -lt "$MIN_PG_VERSION" ]; then
@@ -94,12 +107,12 @@ fi
 # Instalar Dependencias
 #--------------------------------------------------
 echo -e "\n---- Instalando Python 3 y dependencias para Odoo 20 ----"
-sudo apt-get install git python3 python3-venv python3-wheel build-essential wget python3-dev libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools -y
-sudo apt-get install -y python3-pip
+$APT_GET install git python3 python3-venv python3-wheel build-essential wget python3-dev libxslt-dev libzip-dev libldap2-dev libsasl2-dev python3-setuptools -y || abortar "no se pudieron instalar Python 3 y las dependencias de compilacion"
+$APT_GET install -y python3-pip || abortar "no se pudo instalar python3-pip"
 
 # Dependencias adicionales específicas para Odoo 20
 echo -e "\n---- Instalando dependencias adicionales de Odoo 20 ----"
-sudo apt-get install npm node-less libjpeg-dev zlib1g-dev libpq-dev libxml2-dev libffi-dev libssl-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev libcairo2-dev pkg-config -y
+$APT_GET install npm node-less libjpeg-dev zlib1g-dev libpq-dev libxml2-dev libffi-dev libssl-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev libcairo2-dev pkg-config -y || abortar "no se pudieron instalar las dependencias adicionales de Odoo"
 
 #--------------------------------------------------
 # Descargar y Configurar Odoo
@@ -113,9 +126,14 @@ echo "Creando el directorio del servidor Odoo..."
 sudo mkdir -p $OE_HOME_EXT
 
 echo "Clonando el repositorio de Odoo en $OE_HOME_EXT..."
-git clone --depth 1 --branch $OE_VERSION https://github.com/odoo/odoo.git $OE_HOME_EXT || {
-  echo "Error al clonar el repositorio de Odoo. Verifica la conectividad y la URL."; exit 1;
-}
+CLONADO="False"
+for INTENTO in 1 2 3; do
+  git clone --depth 1 --branch $OE_VERSION https://github.com/odoo/odoo.git $OE_HOME_EXT && { CLONADO="True"; break; }
+  echo "Fallo al clonar (intento $INTENTO de 3). Reintentando en 15 segundos..."
+  sudo rm -rf $OE_HOME_EXT
+  sleep 15
+done
+[ "$CLONADO" = "True" ] || abortar "no se pudo clonar el repositorio de Odoo. Verifica la conectividad y la URL."
 
 echo "Creando el directorio de addons personalizados en $OE_ADDONS..."
 sudo mkdir -p $OE_ADDONS
@@ -130,18 +148,20 @@ sudo chown -R $OE_USER:$OE_USER $OE_ADDONS
 # Validar y Descargar requirements.txt
 #--------------------------------------------------
 echo -e "\n---- Validando archivo requirements.txt ----"
-wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/20.0/requirements.txt -O $OE_HOME_EXT/requirements.txt
+$WGET https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/20.0/requirements.txt -O $OE_HOME_EXT/requirements.txt || abortar "no se pudo descargar requirements.txt"
+# wget -O deja un archivo vacio si la descarga falla a medias
+[ -s $OE_HOME_EXT/requirements.txt ] || abortar "requirements.txt esta vacio"
 
 
 #--------------------------------------------------
 # Crear entorno virtual e instalar dependencias
 #--------------------------------------------------
 echo -e "\n---- Creando el entorno virtual ----"
-python3 -m venv $OE_HOME_EXT/venv
+python3 -m venv $OE_HOME_EXT/venv || abortar "no se pudo crear el entorno virtual"
 source $OE_HOME_EXT/venv/bin/activate
 $OE_HOME_EXT/venv/bin/pip install --upgrade pip
 $OE_HOME_EXT/venv/bin/pip install wheel
-$OE_HOME_EXT/venv/bin/pip install -r $OE_HOME_EXT/requirements.txt
+$OE_HOME_EXT/venv/bin/pip install -r $OE_HOME_EXT/requirements.txt || abortar "fallo la instalacion de las dependencias de Python (pip)"
 deactivate
 
 #--------------------------------------------------
@@ -149,10 +169,10 @@ deactivate
 #--------------------------------------------------
 if [ $INSTALL_WKHTMLTOPDF = "True" ]; then
   echo -e "\n---- Instalando Wkhtmltopdf ----"
-  sudo apt-get install -y xfonts-75dpi xfonts-base fontconfig libxrender1 libxext6
-  wget $WKHTMLTOX_X64 -O /tmp/wkhtmltox.deb
+  $APT_GET install -y xfonts-75dpi xfonts-base fontconfig libxrender1 libxext6
+  $WGET $WKHTMLTOX_X64 -O /tmp/wkhtmltox.deb
   # apt (y no dpkg -i) resuelve las dependencias del paquete automaticamente
-  sudo apt-get install -y /tmp/wkhtmltox.deb
+  $APT_GET install -y /tmp/wkhtmltox.deb
   wkhtmltopdf --version || echo "ADVERTENCIA: wkhtmltopdf no quedo instalado; los informes PDF no funcionaran."
 fi
 
@@ -204,10 +224,21 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable $OE_CONFIG
-sudo systemctl start $OE_CONFIG
+# restart (y no start) para que al reejecutar el script se cargue la nueva instalacion
+sudo systemctl restart $OE_CONFIG
 
-echo -e "\n---- Verificando estado del servicio ----"
-sudo systemctl status $OE_CONFIG
+echo -e "\n---- Verificando que Odoo responde en el puerto $OE_PORT ----"
+ODOO_OK="False"
+for i in $(seq 1 30); do
+  if wget -q --tries=1 --timeout=10 -O /dev/null "http://127.0.0.1:$OE_PORT/web/login"; then ODOO_OK="True"; break; fi
+  sleep 2
+done
+sudo systemctl status $OE_CONFIG --no-pager
+if [ "$ODOO_OK" != "True" ]; then
+  sudo tail -n 30 /var/log/$OE_USER/odoo.log
+  abortar "Odoo no responde en el puerto $OE_PORT tras 60 segundos. Revisa /var/log/$OE_USER/odoo.log"
+fi
+echo "Odoo responde correctamente en el puerto $OE_PORT"
 
 #--------------------------------------------------
 # Información de Configuración Final
