@@ -1,12 +1,13 @@
 #!/bin/bash
 ################################################################################
-# Script para instalar Odoo 20 en Ubuntu 24.04 LTS
+# Script para instalar Odoo 20 en Ubuntu 24.04 LTS o Debian 13
 # Basado en el script original de Yenthe Van Ginneken y actualizado para Odoo 20
 #
 # Requisitos de Odoo 20 (odoo/release.py):
 #   - Python 3.12 a 3.14   (Ubuntu 24.04 trae Python 3.12)
 #   - PostgreSQL 16 o superior (Ubuntu 24.04 trae PostgreSQL 16)
-# Ubuntu 22.04 NO es compatible (Python 3.10 y PostgreSQL 14).
+# Debian 13 (trixie) trae Python 3.13 y PostgreSQL 17: tambien es compatible.
+# Ubuntu 22.04 y Debian 12 NO son compatibles (Python 3.10 / 3.11).
 ################################################################################
 
 OE_USER="odoo20"
@@ -60,10 +61,21 @@ echo -e "\n---- Validando la version de Python del sistema ----"
 PY_VERSION=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null)
 if ! python3 -c "import sys; sys.exit(0 if (3, 12) <= sys.version_info[:2] <= (3, 14) else 1)" 2>/dev/null; then
   echo "ERROR: Odoo $OE_VERSION requiere Python entre $MIN_PY_VERSION y $MAX_PY_VERSION. Este sistema tiene Python ${PY_VERSION:-desconocido}."
-  echo "Instala Odoo $OE_VERSION sobre Ubuntu 24.04 LTS."
+  echo "Instala Odoo $OE_VERSION sobre Ubuntu 24.04 LTS o Debian 13."
   exit 1
 fi
 echo "Python $PY_VERSION: compatible"
+
+# Distribucion: algunos paquetes de desarrollo cambian de nombre entre Ubuntu y Debian
+. /etc/os-release
+DISTRO_ID="${ID:-ubuntu}"
+echo "Sistema: ${PRETTY_NAME:-$DISTRO_ID}"
+
+# Contrasena maestra: aleatoria (GENERATE_RANDOM_PASSWORD estaba declarado pero no se usaba y quedaba «admin»).
+# Se usa tambien para el usuario de PostgreSQL y se muestra al final de la instalacion.
+if [ "$GENERATE_RANDOM_PASSWORD" = "True" ]; then
+  OE_SUPERADMIN=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 20)
+fi
 
 #--------------------------------------------------
 # Actualizar Servidor
@@ -112,7 +124,13 @@ $APT_GET install -y python3-pip || abortar "no se pudo instalar python3-pip"
 
 # Dependencias adicionales específicas para Odoo 20
 echo -e "\n---- Instalando dependencias adicionales de Odoo 20 ----"
-$APT_GET install npm node-less libjpeg-dev zlib1g-dev libpq-dev libxml2-dev libffi-dev libssl-dev libjpeg8-dev liblcms2-dev libblas-dev libatlas-base-dev libcairo2-dev pkg-config -y || abortar "no se pudieron instalar las dependencias adicionales de Odoo"
+# libjpeg8-dev y libatlas-base-dev solo existen en Ubuntu; en Debian bastan libjpeg-dev y libopenblas-dev
+if [ "$DISTRO_ID" = "debian" ]; then
+  EXTRA_DEV="libopenblas-dev"
+else
+  EXTRA_DEV="libjpeg8-dev libatlas-base-dev"
+fi
+$APT_GET install npm node-less libjpeg-dev zlib1g-dev libpq-dev libxml2-dev libffi-dev libssl-dev liblcms2-dev libblas-dev libcairo2-dev pkg-config $EXTRA_DEV -y || abortar "no se pudieron instalar las dependencias adicionales de Odoo"
 
 #--------------------------------------------------
 # Descargar y Configurar Odoo
@@ -170,6 +188,11 @@ deactivate
 if [ $INSTALL_WKHTMLTOPDF = "True" ]; then
   echo -e "\n---- Instalando Wkhtmltopdf ----"
   $APT_GET install -y xfonts-75dpi xfonts-base fontconfig libxrender1 libxext6
+  # El build de Ubuntu 22.04 depende de libjpeg-turbo8, que Debian no tiene: en Debian, el build oficial de
+  # Debian 12 (bookworm), que se instala y funciona en Debian 13 (probado)
+  if [ "$DISTRO_ID" = "debian" ]; then
+    WKHTMLTOX_X64=https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6.1-3/wkhtmltox_0.12.6.1-3.bookworm_amd64.deb
+  fi
   $WGET $WKHTMLTOX_X64 -O /tmp/wkhtmltox.deb
   # apt (y no dpkg -i) resuelve las dependencias del paquete automaticamente
   $APT_GET install -y /tmp/wkhtmltox.deb
@@ -192,6 +215,10 @@ http_interface=0.0.0.0
 http_port = $OE_PORT
 gevent_port = $LONGPOLLING_PORT
 EOL
+
+# El archivo lleva la contrasena maestra: solo lo leen root y el usuario de Odoo
+sudo chown root:$OE_USER /etc/${OE_CONFIG}.conf
+sudo chmod 640 /etc/${OE_CONFIG}.conf
 
 sudo mkdir -p /var/log/$OE_USER
 sudo touch /var/log/$OE_USER/odoo.log
@@ -250,6 +277,8 @@ echo "Usuario del sistema: $OE_USER"
 echo "Directorio de instalación: $OE_HOME_EXT"
 echo "Addons personalizados: $OE_ADDONS"
 echo "Archivo de configuración: /etc/${OE_CONFIG}.conf"
+echo "Contraseña maestra (gestor de bases de datos): $OE_SUPERADMIN"
+echo "  Guárdala en un lugar seguro: la pide Odoo para crear, copiar, respaldar y restaurar bases de datos."
 echo "Archivo de log: /var/log/$OE_USER/odoo.log"
 echo "Servicio systemd: $OE_CONFIG.service"
 echo -e "-----------------------------------------------------------"
