@@ -27,6 +27,8 @@ Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **loca
 sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/19.0/odoo_install.sh
 ```
 
+> Esta rama instala **Odoo 19**. Para otra versión, cambia `19.0` en la URL por la rama correspondiente (`20.0`, `18.0`, `17.0`...).
+
 ##### 2. Haz el script ejecutable:
 ```
 sudo chmod +x odoo_install.sh
@@ -36,6 +38,9 @@ sudo chmod +x odoo_install.sh
 ```
 sudo ./odoo_install.sh
 ```
+
+## Contraseña maestra
+Con `GENERATE_RANDOM_PASSWORD="True"` (el valor por defecto) el script genera una contraseña maestra aleatoria y la muestra al final de la instalación. Guárdala en un lugar seguro: Odoo la pide para crear, copiar, respaldar y restaurar bases de datos. El archivo de configuración (`/etc/odoo19-server.conf`) queda legible solo por root y por el usuario de Odoo.
 
 ## Requisitos mínimos del servidor
 Aunque técnicamente puedes ejecutar una instancia de Odoo con 1GB (1024MB) de RAM, no es recomendable. Una instancia de Linux normalmente usa entre 300MB y 500MB, y el resto debe distribuirse entre Odoo, PostgreSQL y otros servicios. Si instalas Odoo, asegúrate de usar al menos 2GB de RAM. Este script podría fallar si los recursos son insuficientes.  
@@ -52,6 +57,6 @@ Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuació
 - **Odoo 16:** Ubuntu 22.04  
 - **Odoo 17:** Ubuntu 22.04 
 - **Odoo 18:** Ubuntu 24.04
-- **Odoo 19:** Ubuntu 24.04
+- **Odoo 19:** Ubuntu 24.04 o Debian 13 (probados; requiere Python 3.10 a 3.14 y PostgreSQL 13 o superior: Ubuntu 22.04 y Debian 12 también cumplen)
 
 Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
