@@ -27,15 +27,60 @@ Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **loca
 sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/18.0/odoo_install.sh
 ```
 
-##### 2. Haz el script ejecutable:
+> Esta rama instala **Odoo 18**. Para otra versión, cambia `18.0` en la URL por la rama correspondiente (ver la tabla de compatibilidad).
+
+##### 2. (Opcional) Revisa los parámetros
+Están al principio del script (ver [Parámetros](#parámetros)). Con los valores por defecto instala Odoo 18 Community, accesible en el puerto 8069, con una contraseña maestra aleatoria.
+
+##### 3. Haz el script ejecutable:
 ```
 sudo chmod +x odoo_install.sh
 ```
 
-##### 3. Ejecuta el script:
+##### 4. Ejecuta el script:
 ```
 sudo ./odoo_install.sh
 ```
+
+Tarda unos minutos. Toda la salida queda también en `odoo_install_logs.txt` (legible solo por root, porque lleva la contraseña maestra).
+
+## Qué hace el script
+1. Comprueba que la versión de Python del sistema es compatible con Odoo 18 (3.10 a 3.14).
+2. Actualiza el sistema e instala PostgreSQL; comprueba que su versión es la 12 o superior.
+3. Crea el usuario de PostgreSQL y el usuario del sistema `odoo18`, que ejecuta el servicio (nunca root).
+4. Instala las librerías que necesita Odoo, `node-less` y `rtlcss`.
+5. Descarga Odoo 18 desde su repositorio oficial en GitHub (solo la última versión de la rama) y, si se pide, Odoo Enterprise.
+6. Crea un entorno virtual de Python e instala ahí las dependencias del `requirements.txt` del propio código de Odoo.
+7. Instala wkhtmltopdf 0.12.6 con qt parcheado (cabeceras y pies de página en los PDF), el build oficial de cada sistema.
+8. Escribe `/etc/odoo18-server.conf`, la rotación del log y el servicio `odoo18-server`; lo arranca y **comprueba que Odoo responde**. Si algo falla, se detiene y dice qué.
+9. Opcional: Nginx delante de Odoo y HTTPS con Let's Encrypt.
+
+## Contraseña maestra
+Con `GENERATE_RANDOM_PASSWORD="True"` (el valor por defecto) el script genera una contraseña maestra aleatoria y la muestra al final de la instalación. Guárdala en un lugar seguro: Odoo la pide para crear, copiar, respaldar y restaurar bases de datos. El usuario de PostgreSQL lleva otra contraseña aleatoria distinta, que solo usa Odoo. El archivo de configuración (`/etc/odoo18-server.conf`) queda legible solo por root y por el usuario de Odoo.
+
+## Parámetros
+- `OE_USER`: usuario del sistema y de PostgreSQL (`odoo18`). Odoo queda en `/odoo18/odoo18-server` y los módulos propios en `/odoo18/custom/addons`.
+- `GENERATE_RANDOM_PASSWORD`: `True` genera la contraseña maestra; con `False` se usa la de `OE_SUPERADMIN` (cámbiala: si se queda en `admin`, el script lo avisa).
+- `INSTALL_WKHTMLTOPDF`: `False` si no quieres instalar wkhtmltopdf.
+- `OE_PORT`: puerto de Odoo (8069).
+- `OE_VERSION`: no lo cambies: cada rama del repositorio instala su versión.
+- `IS_ENTERPRISE`: `True` descarga también Odoo Enterprise desde `OE_ENTERPRISE_URL` (`https://github.com/odoo/enterprise.git`). Solo funciona con una cuenta de GitHub con acceso a ese repositorio (partners de Odoo): git pide el usuario y, como contraseña, un token de acceso personal.
+- `INSTALL_NGINX`: `True` instala Nginx delante de Odoo (puerto 80) con `proxy_mode` activado; Odoo pasa a escuchar solo en local.
+- `WEBSITE_NAME`: dominio del sitio para Nginx (`_` = cualquier nombre).
+- `ENABLE_SSL` y `ADMIN_EMAIL`: con `INSTALL_NGINX="True"`, un dominio en `WEBSITE_NAME` que apunte al servidor y un correo válido en `ADMIN_EMAIL`, el script pide un certificado gratuito de Let's Encrypt con certbot y redirige http a https. _Al habilitar HTTPS con Let's Encrypt aceptas sus [condiciones](https://letsencrypt.org/repository/)._
+- `LONGPOLLING_PORT`: puerto de /websocket cuando Odoo trabaja con *workers* (gevent_port).
+
+### Nginx y *workers*
+El script deja Odoo en modo de un solo proceso, que atiende también /websocket en el puerto 8069, y Nginx envía todo ahí. Si activas *workers* en el `.conf` (recomendado en producción, ver la [guía de despliegue de Odoo](https://www.odoo.com/documentation/18.0/administration/deployment/deploy.html)), cambia en `/etc/nginx/sites-available/odoo18` el `proxy_pass` de `location /websocket` al puerto `LONGPOLLING_PORT` (8072).
+
+## Cambios del 12 de noviembre de 2026
+- La contraseña maestra y la de PostgreSQL eran `admin` (`GENERATE_RANDOM_PASSWORD` no se usaba) y el `.conf` quedaba legible para todos.
+- wkhtmltopdf ya no instala `libssl1.1` de Ubuntu 20.04 (sin soporte) con `dpkg -i`: usa el build de cada sistema.
+- El `requirements.txt` propio se había quedado atrás (sin las versiones para Python 3.13): ahora se usa el del código de Odoo.
+- Comprueba Python y PostgreSQL antes de instalar, ya no actualiza el `pip` del sistema y verifica al final que Odoo responde.
+- Con Python 3.10 (Ubuntu 22.04) instala gevent 22.10.2 y greenlet 2.0.2: los 21.8.0 y 1.1.2 que fija Odoo ya no se pueden compilar.
+
+Todas las ramas comparten ya el mismo script, con los requisitos de su versión de Odoo: contraseña maestra aleatoria y otra distinta para PostgreSQL, `.conf` y log de instalación legibles solo por quien debe, wkhtmltopdf con qt parcheado del build oficial de cada sistema, dependencias de Python del `requirements.txt` del propio código de Odoo en un entorno virtual, servicio con reinicio automático y rotación del log, Nginx/HTTPS y Enterprise opcionales, y una comprobación final de que Odoo responde: si un paso crítico falla, el script se detiene y lo dice.
 
 ## Requisitos mínimos del servidor
 Aunque técnicamente puedes ejecutar una instancia de Odoo con 1GB (1024MB) de RAM, no es recomendable. Una instancia de Linux normalmente usa entre 300MB y 500MB, y el resto debe distribuirse entre Odoo, PostgreSQL y otros servicios. Si instalas Odoo, asegúrate de usar al menos 2GB de RAM. Este script podría fallar si los recursos son insuficientes.  
@@ -43,14 +88,21 @@ Se han reportado problemas conocidos en DigitalOcean, por ejemplo, donde la inst
 
 ---
 
-## Compatibilidad de versiones de Odoo y Ubuntu
-Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuación, una lista de recomendaciones:
+## Compatibilidad de versiones de Odoo y del sistema
+Cada rama comprueba la versión de Python y de PostgreSQL antes de instalar. Los sistemas de la tabla se probaron con el script en servidores limpios (instalación, base de datos creada y PDF generado desde Odoo) el 12 de noviembre de 2026.
 
-- **Odoo 13:** Ubuntu 20.04
-- **Odoo 14:** Ubuntu 20.04  
-- **Odoo 15:** Ubuntu 20.04  
-- **Odoo 16:** Ubuntu 22.04  
-- **Odoo 17:** Ubuntu 22.04 
-- **Odoo 18:** Ubuntu 24.04
+| Rama | Python | PostgreSQL | Sistemas probados |
+|---|---|---|---|
+| 12.0 | 3.5 a 3.8 | 10 o superior | Ubuntu 20.04¹ y Ubuntu 18.04¹ |
+| 13.0 | 3.6 a 3.8 | 10 o superior | Ubuntu 20.04¹ y Ubuntu 18.04¹ |
+| 14.0 | 3.7 a 3.10 | 12 o superior | Ubuntu 22.04 y Ubuntu 20.04¹ |
+| 15.0 | 3.7 a 3.12 | 12 o superior | Ubuntu 22.04, Ubuntu 24.04 y Ubuntu 20.04¹ |
+| 16.0 | 3.7 a 3.12 | 12 o superior | Ubuntu 22.04, Ubuntu 24.04, Debian 12 y Ubuntu 20.04¹ |
+| 17.0 | 3.10 a 3.14 | 12 o superior | Ubuntu 24.04, Debian 13, Ubuntu 22.04, Debian 12 y Ubuntu 26.04 |
+| **18.0** | 3.10 a 3.14 | 12 o superior | Ubuntu 24.04, Debian 13, Ubuntu 22.04, Debian 12 y Ubuntu 26.04 |
+| 19.0 | 3.10 a 3.14 | 13 o superior | Ubuntu 24.04, Debian 13, Ubuntu 22.04, Debian 12 y Ubuntu 26.04 |
+| 20.0 | 3.12 a 3.14 | 16 o superior | Ubuntu 24.04, Debian 13 y Ubuntu 26.04 |
 
-Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
+¹ Ubuntu 18.04 y Ubuntu 20.04 ya no reciben actualizaciones de seguridad estándar de su distribución: úsalos solo para versiones de Odoo que no admiten un sistema más reciente.
+
+Es importante usar un sistema compatible para evitar problemas durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**.
