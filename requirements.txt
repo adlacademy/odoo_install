@@ -1,3 +1,6 @@
+# requirements.txt de Odoo 20.0 (copia de https://github.com/odoo/odoo/blob/20.0/requirements.txt del 12-nov-2026) más los paquetes
+# opcionales que instala el script. Desde el 12-nov-2026 odoo_install.sh usa el requirements.txt del propio código de Odoo
+# que descarga (siempre al día con esa versión); este archivo se conserva para copias antiguas del script.
 # The officially supported versions of the following packages are their
 # python3-* equivalent distributed in Ubuntu 24.04 and Debian 12
 asn1crypto==1.5.1 ; python_version >= '3.11'
@@ -60,6 +63,8 @@ xlrd==2.0.1 ; python_version >= '3.12'
 XlsxWriter==3.1.9 ; python_version >= '3.12'
 zeep==4.2.1 ; python_version >= '3.11' and python_version < '3.13'
 zeep==4.3.1 ; python_version >= '3.13'
-pdfminer.six  # Para indexación de documentos PDF en attachment_indexation
-rlPyCairo  # Backend de renderizado para reportlab (códigos de barras en PDFs)
-markdown2  # Renderizado de adjuntos markdown en el módulo mail (evita el aviso "markdown2 is not installed")
+
+# Opcionales que el script instala aparte
+pdfminer.six
+rlPyCairo
+markdown2
