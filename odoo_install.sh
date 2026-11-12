@@ -81,7 +81,7 @@ aleatoria() {
 #--------------------------------------------------
 # Validar version de Python (Odoo 16 exige 3.7 - 3.12)
 #--------------------------------------------------
-echo -e "\n---- Validando la version de Python del sistema ----"
+echo -e "\n---- Validando la versión de Python del sistema ----"
 PY_VERSION=$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null)
 if ! python3 -c "import sys; v = lambda s: tuple(int(x) for x in s.split('.')); sys.exit(0 if v('$MIN_PY_VERSION') <= sys.version_info[:2] <= v('$MAX_PY_VERSION') else 1)" 2>/dev/null; then
   echo "ERROR: Odoo $OE_VERSION requiere Python entre $MIN_PY_VERSION y $MAX_PY_VERSION. Este sistema tiene Python ${PY_VERSION:-desconocido}."
@@ -105,16 +105,16 @@ esac
 if [ "$GENERATE_RANDOM_PASSWORD" = "True" ]; then
   OE_SUPERADMIN=$(aleatoria 20)
 fi
-[ -n "$OE_SUPERADMIN" ] || abortar "no se pudo generar la contrasena maestra"
+[ -n "$OE_SUPERADMIN" ] || abortar "no se pudo generar la contraseña maestra"
 OE_DB_PASSWORD=$(aleatoria 24)
-[ -n "$OE_DB_PASSWORD" ] || abortar "no se pudo generar la contrasena de PostgreSQL"
+[ -n "$OE_DB_PASSWORD" ] || abortar "no se pudo generar la contraseña de PostgreSQL"
 
 #--------------------------------------------------
 # Actualizar Servidor
 #--------------------------------------------------
 echo -e "\n---- Actualizando el Servidor ----"
 $APT_GET update || abortar "no se pudo actualizar la lista de paquetes (apt-get update)"
-$APT_GET upgrade -y || abortar "fallo la actualizacion del sistema (apt-get upgrade)"
+$APT_GET upgrade -y || abortar "falló la actualización del sistema (apt-get upgrade)"
 
 #--------------------------------------------------
 # Instalar PostgreSQL
@@ -124,7 +124,7 @@ $APT_GET install postgresql -y || abortar "no se pudo instalar PostgreSQL"
 
 PG_VERSION=$(ls /etc/postgresql 2>/dev/null | sort -n | tail -1)
 if [ -z "$PG_VERSION" ] || [ "${PG_VERSION%%.*}" -lt "$MIN_PG_VERSION" ]; then
-  echo "ERROR: Odoo $OE_VERSION requiere PostgreSQL $MIN_PG_VERSION o superior. Version instalada: ${PG_VERSION:-ninguna}."
+  echo "ERROR: Odoo $OE_VERSION requiere PostgreSQL $MIN_PG_VERSION o superior. Versión instalada: ${PG_VERSION:-ninguna}."
   exit 1
 fi
 echo "PostgreSQL $PG_VERSION: compatible"
@@ -137,7 +137,7 @@ if [ -f "$PG_HBA_FILE" ]; then
   sudo sed -i "s/local   all             all                                     peer/local   all             all                                     md5/" $PG_HBA_FILE
   sudo systemctl restart postgresql
 fi
-sudo su - postgres -c "psql -c \"ALTER USER $OE_USER WITH PASSWORD '$OE_DB_PASSWORD';\"" || abortar "no se pudo poner la contrasena del usuario $OE_USER en PostgreSQL"
+sudo su - postgres -c "psql -c \"ALTER USER $OE_USER WITH PASSWORD '$OE_DB_PASSWORD';\"" || abortar "no se pudo poner la contraseña del usuario $OE_USER en PostgreSQL"
 
 #--------------------------------------------------
 # Validar y Crear Usuario del Sistema
@@ -193,7 +193,7 @@ echo "Clonando el repositorio de Odoo en $OE_HOME_EXT..."
 CLONADO="False"
 for INTENTO in 1 2 3; do
   git clone --depth 1 --branch $OE_VERSION https://github.com/odoo/odoo.git $OE_HOME_EXT && { CLONADO="True"; break; }
-  echo "Fallo al clonar (intento $INTENTO de 3). Reintentando en 15 segundos..."
+  echo "Falló al clonar (intento $INTENTO de 3). Reintentando en 15 segundos..."
   sudo rm -rf $OE_HOME_EXT
   sleep 15
 done
@@ -203,7 +203,7 @@ ENTERPRISE_ADDONS=""
 if [ "$IS_ENTERPRISE" = "True" ]; then
   echo -e "\n---- Descargando Odoo Enterprise ----"
   echo "Hace falta una cuenta de GitHub con acceso a $OE_ENTERPRISE_URL (partners de Odoo)."
-  echo "Si git pide credenciales: tu usuario de GitHub y, como contrasena, un token de acceso personal."
+  echo "Si git pide credenciales: tu usuario de GitHub y, como contraseña, un token de acceso personal."
   sudo rm -rf $OE_HOME/enterprise
   sudo mkdir -p $OE_HOME/enterprise
   git clone --depth 1 --branch $OE_VERSION "$OE_ENTERPRISE_URL" $OE_HOME/enterprise/addons || abortar "no se pudo descargar Odoo Enterprise. Comprueba que tu cuenta de GitHub tiene acceso a $OE_ENTERPRISE_URL"
@@ -225,7 +225,7 @@ sudo chown -R $OE_USER:$OE_USER $OE_ADDONS
 # Se usa el requirements.txt del propio codigo de Odoo que se acaba de descargar: siempre corresponde a esa
 # version del codigo y trae las versiones de cada paquete para cada version de Python.
 echo -e "\n---- Validando archivo requirements.txt ----"
-[ -s $OE_HOME_EXT/requirements.txt ] || abortar "el codigo de Odoo descargado no trae requirements.txt"
+[ -s $OE_HOME_EXT/requirements.txt ] || abortar "el código de Odoo descargado no trae requirements.txt"
 
 
 #--------------------------------------------------
@@ -246,7 +246,7 @@ $OE_HOME_EXT/venv/bin/pip install "setuptools<81" || abortar "no se pudo instala
 sed -e "s/^gevent==21\.8\.0/gevent==22.10.2/" -e "s/^greenlet==1\.1\.2/greenlet==2.0.2/" \
     $OE_HOME_EXT/requirements.txt > /tmp/odoo_requirements.txt
 REQUISITOS=/tmp/odoo_requirements.txt
-$OE_HOME_EXT/venv/bin/pip install -r $REQUISITOS || abortar "fallo la instalacion de las dependencias de Python (pip)"
+$OE_HOME_EXT/venv/bin/pip install -r $REQUISITOS || abortar "falló la instalación de las dependencias de Python (pip)"
 # Paquetes que Odoo usa si estan instalados y que su requirements.txt no trae: pdfminer.six (indexa el texto de los PDF adjuntos).
 # Se instalan sin cambiar nada de lo que fijo el requirements.txt (si no, pdfminer.six subia cryptography y el pyOpenSSL
 # antiguo de Odoo dejaba de cargar: «module 'lib' has no attribute 'GEN_EMAIL'»); si no hay version compatible, se omiten.
@@ -279,10 +279,10 @@ if [ $INSTALL_WKHTMLTOPDF = "True" ]; then
     # apt (y no dpkg -i) resuelve las dependencias del paquete automaticamente
     $APT_GET install -y /tmp/wkhtmltox.deb
   else
-    echo "ADVERTENCIA: no hay build oficial de wkhtmltopdf con qt parcheado para $(dpkg --print-architecture): se instala el del sistema (los PDF saldran sin cabecera ni pie)."
+    echo "ADVERTENCIA: no hay build oficial de wkhtmltopdf con qt parcheado para $(dpkg --print-architecture): se instala el del sistema (los PDF saldrán sin cabecera ni pie)."
     $APT_GET install -y wkhtmltopdf
   fi
-  wkhtmltopdf --version || echo "ADVERTENCIA: wkhtmltopdf no quedo instalado; los informes PDF no funcionaran."
+  wkhtmltopdf --version || echo "ADVERTENCIA: wkhtmltopdf no quedó instalado; los informes PDF no funcionarán."
 fi
 
 #--------------------------------------------------
@@ -436,7 +436,7 @@ EOF
   if [ "$WEBSITE_NAME" = "_" ]; then
     sudo rm -f /etc/nginx/sites-enabled/default
   fi
-  sudo nginx -t || abortar "la configuracion de Nginx no es valida (/etc/nginx/sites-available/$OE_USER)"
+  sudo nginx -t || abortar "la configuración de Nginx no es válida (/etc/nginx/sites-available/$OE_USER)"
   sudo systemctl reload nginx || sudo systemctl restart nginx
   URL_ACCESO="http://$( [ "$WEBSITE_NAME" = "_" ] && echo '<tu-ip-servidor>' || echo "$WEBSITE_NAME" )"
 
@@ -446,7 +446,7 @@ EOF
     if sudo certbot --nginx -d $WEBSITE_NAME --non-interactive --agree-tos -m $ADMIN_EMAIL --redirect; then
       URL_ACCESO="https://$WEBSITE_NAME"
     else
-      echo "ADVERTENCIA: certbot no pudo obtener el certificado. Comprueba que $WEBSITE_NAME apunta a este servidor y que el puerto 80 esta abierto; Odoo sigue disponible por http."
+      echo "ADVERTENCIA: certbot no pudo obtener el certificado. Comprueba que $WEBSITE_NAME apunta a este servidor y que el puerto 80 está abierto; Odoo sigue disponible por http."
     fi
   elif [ "$ENABLE_SSL" = "True" ]; then
     echo "HTTPS no activado: para activarlo pon tu dominio en WEBSITE_NAME y tu correo en ADMIN_EMAIL."
@@ -462,7 +462,7 @@ echo "Acceso: $URL_ACCESO"
 echo "Usuario del sistema: $OE_USER"
 echo "Directorio de instalación: $OE_HOME_EXT"
 echo "Addons personalizados: $OE_ADDONS"
-echo "  (mientras esa carpeta este vacia, Odoo la omite y lo avisa en el log: \"invalid addons directory\". Es normal.)"
+echo "  (mientras esa carpeta esté vacía, Odoo la omite y lo avisa en el log: \"invalid addons directory\". Es normal.)"
 echo "Archivo de configuración: /etc/${OE_CONFIG}.conf"
 echo "Contraseña maestra (gestor de bases de datos): $OE_SUPERADMIN"
 echo "  Guárdala en un lugar seguro: la pide Odoo para crear, copiar, respaldar y restaurar bases de datos."
