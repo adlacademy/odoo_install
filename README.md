@@ -20,9 +20,6 @@ Si estás interesado en la versión **Enterprise** de Odoo o necesitas la **loca
 
 # [Odoo](https://www.odoo.com "Página principal de Odoo") Script de Instalación
 
-## Instalando Nginx
-Si configuras el parámetro ```INSTALL_NGINX``` como ```True```, también debes configurar los *workers*. Sin *workers*, probablemente experimentarás problemas de pérdida de conexión. Consulta [la guía de implementación de Odoo](https://www.odoo.com/documentation/14.0/setup/deploy.html) para aprender a configurar los *workers*.
-
 ## Procedimiento de instalación
 
 ##### 1. Descarga el script:
@@ -30,21 +27,10 @@ Si configuras el parámetro ```INSTALL_NGINX``` como ```True```, también debes 
 sudo wget https://raw.githubusercontent.com/adlacademy/odoo_install/refs/heads/14.0/odoo_install.sh
 ```
 
-##### 2. Modifica los parámetros según tus necesidades.
-Hay algunos parámetros que puedes configurar. A continuación, la lista más utilizada:<br/>
-- ```OE_USER``` será el nombre de usuario para el usuario del sistema.<br/>
-- ```GENERATE_RANDOM_PASSWORD``` si se establece en ```True```, el script generará una contraseña aleatoria; si se establece en ```False```, se usará la contraseña configurada en ```OE_SUPERADMIN```. Por defecto, el valor es ```True``` y el script generará una contraseña aleatoria y segura.<br/>
-- ```INSTALL_WKHTMLTOPDF``` establece este parámetro en ```False``` si no deseas instalar Wkhtmltopdf; si quieres instalarlo, configúralo como ```True```.<br/>
-- ```OE_PORT``` es el puerto en el que Odoo se ejecutará, por ejemplo, 8069.<br/>
-- ```OE_VERSION``` es la versión de Odoo a instalar, por ejemplo, ```14.0``` para Odoo V13.<br/>
-- ```IS_ENTERPRISE``` instalará la versión Enterprise sobre ```14.0``` si lo configuras como ```True```; usa ```False``` para la versión Community de Odoo 13.<br/>
-- ```OE_SUPERADMIN``` es la contraseña maestra para esta instalación de Odoo.<br/>
-- ```INSTALL_NGINX``` está configurado como ```False``` por defecto. Configúralo en ```True``` si deseas instalar Nginx.<br/>
-- ```WEBSITE_NAME``` establece aquí el nombre del sitio web para la configuración de Nginx.<br/>
-- ```ENABLE_SSL``` configúralo en ```True``` para instalar [certbot](https://github.com/certbot/certbot) y configurar Nginx con HTTPS utilizando un certificado gratuito de Let's Encrypt.<br/>
-- ```ADMIN_EMAIL``` el correo electrónico necesario para el registro de Let's Encrypt. Reemplaza el valor predeterminado con un correo válido de tu organización.<br/>
-- ```INSTALL_NGINX``` y ```ENABLE_SSL``` deben estar configurados como ```True```, y el valor en ```ADMIN_EMAIL``` debe ser un correo válido para la instalación de certbot.<br/>
-  _Al habilitar SSL mediante Let's Encrypt, aceptas las siguientes [políticas](https://www.eff.org/code/privacy/policy)_.<br/>
+> Esta rama instala **Odoo 14**. Para otra versión, cambia `14.0` en la URL por la rama correspondiente (ver la tabla de compatibilidad).
+
+##### 2. (Opcional) Revisa los parámetros
+Están al principio del script (ver [Parámetros](#parámetros)). Con los valores por defecto instala Odoo 14 Community, accesible en el puerto 8069, con una contraseña maestra aleatoria.
 
 ##### 3. Haz el script ejecutable:
 ```
@@ -56,20 +42,67 @@ sudo chmod +x odoo_install.sh
 sudo ./odoo_install.sh
 ```
 
+Tarda unos minutos. Toda la salida queda también en `odoo_install_logs.txt` (legible solo por root, porque lleva la contraseña maestra).
+
+## Qué hace el script
+1. Comprueba que la versión de Python del sistema es compatible con Odoo 14 (3.7 a 3.10).
+2. Actualiza el sistema e instala PostgreSQL; comprueba que su versión es la 12 o superior.
+3. Crea el usuario de PostgreSQL y el usuario del sistema `odoo14`, que ejecuta el servicio (nunca root).
+4. Instala las librerías que necesita Odoo, `node-less` y `rtlcss`.
+5. Descarga Odoo 14 desde su repositorio oficial en GitHub (solo la última versión de la rama) y, si se pide, Odoo Enterprise.
+6. Crea un entorno virtual de Python e instala ahí las dependencias del `requirements.txt` del propio código de Odoo.
+7. Instala wkhtmltopdf 0.12.6 con qt parcheado (cabeceras y pies de página en los PDF), el build oficial de cada sistema.
+8. Escribe `/etc/odoo14-server.conf`, la rotación del log y el servicio `odoo14-server`; lo arranca y **comprueba que Odoo responde**. Si algo falla, se detiene y dice qué.
+9. Opcional: Nginx delante de Odoo y HTTPS con Let's Encrypt.
+
+## Contraseña maestra
+Con `GENERATE_RANDOM_PASSWORD="True"` (el valor por defecto) el script genera una contraseña maestra aleatoria y la muestra al final de la instalación. Guárdala en un lugar seguro: Odoo la pide para crear, copiar, respaldar y restaurar bases de datos. El usuario de PostgreSQL lleva otra contraseña aleatoria distinta, que solo usa Odoo. El archivo de configuración (`/etc/odoo14-server.conf`) queda legible solo por root y por el usuario de Odoo.
+
+## Parámetros
+- `OE_USER`: usuario del sistema y de PostgreSQL (`odoo14`). Odoo queda en `/odoo14/odoo14-server` y los módulos propios en `/odoo14/custom/addons`.
+- `GENERATE_RANDOM_PASSWORD`: `True` genera la contraseña maestra; con `False` se usa la de `OE_SUPERADMIN` (cámbiala: si se queda en `admin`, el script lo avisa).
+- `INSTALL_WKHTMLTOPDF`: `False` si no quieres instalar wkhtmltopdf.
+- `OE_PORT`: puerto de Odoo (8069).
+- `OE_VERSION`: no lo cambies: cada rama del repositorio instala su versión.
+- `IS_ENTERPRISE`: `True` descarga también Odoo Enterprise desde `OE_ENTERPRISE_URL` (`https://github.com/odoo/enterprise.git`). Solo funciona con una cuenta de GitHub con acceso a ese repositorio (partners de Odoo): git pide el usuario y, como contraseña, un token de acceso personal.
+- `INSTALL_NGINX`: `True` instala Nginx delante de Odoo (puerto 80) con `proxy_mode` activado; Odoo pasa a escuchar solo en local.
+- `WEBSITE_NAME`: dominio del sitio para Nginx (`_` = cualquier nombre).
+- `ENABLE_SSL` y `ADMIN_EMAIL`: con `INSTALL_NGINX="True"`, un dominio en `WEBSITE_NAME` que apunte al servidor y un correo válido en `ADMIN_EMAIL`, el script pide un certificado gratuito de Let's Encrypt con certbot y redirige http a https. _Al habilitar HTTPS con Let's Encrypt aceptas sus [condiciones](https://letsencrypt.org/repository/)._
+- `LONGPOLLING_PORT`: puerto de /longpolling cuando Odoo trabaja con *workers* (longpolling_port).
+
+### Nginx y *workers*
+El script deja Odoo en modo de un solo proceso, que atiende también /longpolling en el puerto 8069, y Nginx envía todo ahí. Si activas *workers* en el `.conf` (recomendado en producción, ver la [guía de despliegue de Odoo](https://www.odoo.com/documentation/14.0/administration/deployment/deploy.html)), cambia en `/etc/nginx/sites-available/odoo14` el `proxy_pass` de `location /longpolling` al puerto `LONGPOLLING_PORT` (8072).
+
+## Cambios del 12 de noviembre de 2026
+- Usuario `odoo14` (antes `odoo`, sin versión), sin el grupo `sudo`.
+- Las dependencias de Python van en un entorno virtual (antes, `pip3` con `sudo` en el Python del sistema).
+- wkhtmltopdf 0.12.6 con qt parcheado (antes, el de Ubuntu 14.04, que no se instala en 20.04 ni 22.04), sin `libpng12-0` ni el repositorio xenial.
+- Servicio systemd (antes, un script de `/etc/init.d`) y la comparación de versión que creaba un archivo `11.0` en vez de comparar.
+- Con Python 3.10 y 3.11 instala gevent 22.10.2 y greenlet 2.0.2 (los 21.8.0 y 1.1.2 que fija Odoo ya no se pueden compilar) y setuptools anterior a la 81 (Odoo 14 usa pkg_resources).
+
+Todas las ramas comparten ya el mismo script, con los requisitos de su versión de Odoo: contraseña maestra aleatoria y otra distinta para PostgreSQL, `.conf` y log de instalación legibles solo por quien debe, wkhtmltopdf con qt parcheado del build oficial de cada sistema, dependencias de Python del `requirements.txt` del propio código de Odoo en un entorno virtual, servicio con reinicio automático y rotación del log, Nginx/HTTPS y Enterprise opcionales, y una comprobación final de que Odoo responde: si un paso crítico falla, el script se detiene y lo dice.
+
 ## Requisitos mínimos del servidor
 Aunque técnicamente puedes ejecutar una instancia de Odoo con 1GB (1024MB) de RAM, no es recomendable. Una instancia de Linux normalmente usa entre 300MB y 500MB, y el resto debe distribuirse entre Odoo, PostgreSQL y otros servicios. Si instalas Odoo, asegúrate de usar al menos 2GB de RAM. Este script podría fallar si los recursos son insuficientes.  
 Se han reportado problemas conocidos en DigitalOcean, por ejemplo, donde la instalación falla en máquinas con 1GB de RAM.
 
 ---
 
-## Compatibilidad de versiones de Odoo y Ubuntu
-Asegúrate de instalar Odoo en una versión compatible de Ubuntu. A continuación, una lista de recomendaciones:
+## Compatibilidad de versiones de Odoo y del sistema
+Cada rama comprueba la versión de Python y de PostgreSQL antes de instalar. Los sistemas de la tabla se probaron con el script en servidores limpios (instalación, base de datos creada y PDF generado desde Odoo) el 12 de noviembre de 2026.
 
-- **Odoo 13:** Ubuntu 20.04
-- **Odoo 14:** Ubuntu 20.04  
-- **Odoo 15:** Ubuntu 20.04  
-- **Odoo 16:** Ubuntu 20.04  
-- **Odoo 17:** Ubuntu 22.04 
-- **Odoo 18:** Ubuntu 24.04 
+| Rama | Python | PostgreSQL | Sistemas probados |
+|---|---|---|---|
+| 12.0 | 3.5 a 3.8 | 10 o superior | Ubuntu 20.04¹ y Ubuntu 18.04¹ |
+| 13.0 | 3.6 a 3.8 | 10 o superior | Ubuntu 20.04¹ y Ubuntu 18.04¹ |
+| **14.0** | 3.7 a 3.10 | 12 o superior | Ubuntu 22.04 y Ubuntu 20.04¹ |
+| 15.0 | 3.7 a 3.12 | 12 o superior | Ubuntu 22.04, Ubuntu 24.04 y Ubuntu 20.04¹ |
+| 16.0 | 3.7 a 3.12 | 12 o superior | Ubuntu 22.04, Ubuntu 24.04, Debian 12 y Ubuntu 20.04¹ |
+| 17.0 | 3.10 a 3.14 | 12 o superior | Ubuntu 24.04, Debian 13, Ubuntu 22.04, Debian 12 y Ubuntu 26.04 |
+| 18.0 | 3.10 a 3.14 | 12 o superior | Ubuntu 24.04, Debian 13, Ubuntu 22.04, Debian 12 y Ubuntu 26.04 |
+| 19.0 | 3.10 a 3.14 | 13 o superior | Ubuntu 24.04, Debian 13, Ubuntu 22.04, Debian 12 y Ubuntu 26.04 |
+| 20.0 | 3.12 a 3.14 | 16 o superior | Ubuntu 24.04, Debian 13 y Ubuntu 26.04 |
 
-Es importante usar la versión correcta de Ubuntu para evitar problemas de compatibilidad durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**. 
+¹ Ubuntu 18.04 y Ubuntu 20.04 ya no reciben actualizaciones de seguridad estándar de su distribución: úsalos solo para versiones de Odoo que no admiten un sistema más reciente.
+
+Es importante usar un sistema compatible para evitar problemas durante la instalación. Si necesitas ayuda con la instalación o configuración, no dudes en contactarnos a través de **info@adlacademy.com.do** o **WhatsApp: +1(809)-418-4467**.
