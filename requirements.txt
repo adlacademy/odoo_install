@@ -1,3 +1,6 @@
+# requirements.txt de Odoo 16.0 (copia de https://github.com/odoo/odoo/blob/16.0/requirements.txt del 12-nov-2026) más los paquetes
+# opcionales que instala el script. Desde el 12-nov-2026 odoo_install.sh usa el requirements.txt del propio código de Odoo
+# que descarga (siempre al día con esa versión); este archivo se conserva para copias antiguas del script.
 # The officially supported versions of the following packages are their
 # python3-* equivalent distributed in Ubuntu 22.04 and Debian 11
 Babel==2.9.1  # min version = 2.6.0 (Focal with security backports)
@@ -11,12 +14,13 @@ freezegun==0.3.11; python_version < '3.8'
 freezegun==0.3.15; python_version >= '3.8'
 gevent==1.5.0 ; sys_platform != 'win32' and python_version == '3.7'
 gevent==20.9.0 ; sys_platform != 'win32' and python_version > '3.7' and python_version <= '3.9'
-gevent==22.10.2 ; sys_platform != 'win32' and python_version > '3.9' and python_version <= '3.10'  # (Jammy)
-gevent==22.10.2 ; sys_platform != 'win32' and python_version > '3.10' and python_version < '3.12'  # (Jammy)
+gevent==21.8.0 ; sys_platform != 'win32' and python_version > '3.9' and python_version <= '3.10'  # (Jammy)
+gevent==22.10.2; sys_platform != 'win32' and python_version > '3.10'and python_version < '3.12' # (Jammy)
 gevent==24.2.1 ; sys_platform != 'win32' and python_version >= '3.12'  # (Noble)
 greenlet==0.4.15 ; sys_platform != 'win32' and python_version == '3.7'
 greenlet==0.4.17 ; sys_platform != 'win32' and python_version > '3.7' and python_version <= '3.9'
-greenlet==2.0.2 ; sys_platform != 'win32' and python_version > '3.9' and python_version < '3.12'  # (Jammy)
+greenlet==1.1.2 ; sys_platform != 'win32' and python_version  > '3.9' and python_version <= '3.10'  # (Jammy)
+greenlet==2.0.2 ; sys_platform != 'win32' and python_version > '3.10' and python_version < '3.12' # (Jammy)
 greenlet==3.0.3 ; sys_platform != 'win32' and python_version >= '3.12'  # (Noble)
 idna==2.10
 Jinja2==2.11.3 ; python_version <= '3.10'  # min version = 2.10.1 (Focal - with security backports)
@@ -51,7 +55,8 @@ pydot==1.4.2
 pyopenssl==20.0.1; python_version < '3.12'
 pyopenssl==24.1.0 ; python_version >= '3.12' # (Noble) min 23.2.0, pinned for compatibility with cryptography==42.0.8 and security patches
 PyPDF2==1.26.0 ; python_version <= '3.10'
-PyPDF2==2.12.1 ; python_version > '3.10'
+PyPDF2==2.12.1 ; python_version > '3.10' and python_version < '3.13' # (Noble and below)
+PyPDF==5.4.0 ; python_version >= '3.13' # (Trixie)
 pypiwin32 ; sys_platform == 'win32'
 pyserial==3.5
 python-dateutil==2.8.1
@@ -78,3 +83,6 @@ xlrd==1.2.0; python_version >= '3.8'
 XlsxWriter==1.1.2
 xlwt==1.3.0
 zeep==4.0.0
+
+# Opcionales que el script instala aparte
+pdfminer.six
