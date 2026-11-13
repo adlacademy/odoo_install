@@ -89,7 +89,7 @@ Se han reportado problemas conocidos en DigitalOcean, por ejemplo, donde la inst
 ---
 
 ## Compatibilidad de versiones de Odoo y del sistema
-Cada rama comprueba la versión de Python y de PostgreSQL antes de instalar. Los sistemas de la tabla se probaron con el script en servidores limpios (instalación, base de datos creada y PDF generado desde Odoo) el 12 de noviembre de 2026.
+Cada rama comprueba la versión de Python y de PostgreSQL antes de instalar. Los sistemas de la tabla se probaron con el script en servidores limpios (instalación, base de datos creada y PDF generado desde Odoo) el 12 y el 13 de noviembre de 2026.
 
 | Rama | Python | PostgreSQL | Sistemas probados |
 |---|---|---|---|
